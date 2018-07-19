@@ -1,0 +1,208 @@
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script type="text/javascript" src="sprite.js"></script>
+        <title>Exercicio 1 - Lista 1</title>
+    </head>
+
+    <body  onLoad="aviso()" onclick="start()" >
+        <div id="container">
+            <canvas id="tela" width="800" height="600">
+                Erro no canvas!
+            </canvas>
+        </div>
+   </body>
+    <!--começo javascript -->
+<script type="text/javascript">
+    //configura o texto
+    function Text(font, size, rgb) {
+    	this.font = font 	|| "Arial";
+    	this.size = size 	|| 20;
+    	this.color = rgb 	|| "#FFFFFF";
+
+    	this.raster = function(ctx, text, x, y) {
+    		ctx.font = "" + this.size + "px " + this.font;
+    		ctx.fillStyle = this.color;
+    		ctx.fillText(text, x, y);
+    	}
+    }
+    //controle de estado
+    function State() {
+    	this.life = 3;
+    	this.score = 0;
+    	this.text = new Text();
+
+    	this.sumScore = function() { this.score++; }
+    	this.lostLife = function() { this.life--; }
+
+      //exibe o texto
+    	this.show = function(ctx) {
+    		this.text.raster(ctx, "Vidas:  " + this.life, 10, 20);
+    		this.text.raster(ctx, "Pontos: " + this.score, 650, 20);
+    		this.text.raster(ctx, "Combustivel: ", 10, 52);
+    	}
+
+    	this.reset = function() {
+    		this.life = 5;
+    		this.score = 0;
+    	}
+    }
+
+    var clique = 0;//bloqeuia o mouse depois que o jogo comeca
+
+    function aviso(){//espera o inicio do jogo
+      alert("Clique na tela para começar o jogo");
+    }
+
+    function start() {//comeca o jogo
+      if(clique>0){
+        alert("Não clique novamente!");
+      }else {
+        clique++;
+        //console.log(clique);
+
+    	var canvas = document.getElementById("tela");
+    	var ctx = canvas.getContext("2d");
+    	var state = new State();
+
+    	const WIDTH = canvas.offsetWidth;
+    	const HEIGHT = canvas.offsetHeight;
+    	const base = { pos: new Point(Math.random() * (WIDTH-150), HEIGHT-15),
+    				   size: new Size(150, 15) };
+
+    	const FPS = 60;
+    	const DT = 1/FPS;
+    	const G = -75;
+
+        var fundo  =  new Image();
+        fundo.src = "lua.jpg";
+
+      //cria a nave na tela
+    	var nave = new Sprite(new Point(WIDTH/2, HEIGHT/2), new Size(80, 120), "nave3.png");
+      //cria a barra de combustivel na tela
+    	var bar = { pos: new Point(135, 37), size: new Size(WIDTH-170, 15), energy: 1.0 };
+
+
+    	var loop = function() {
+    		ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    		if(bar.energy <= 0.0) {
+    			alert("Acabou o combustivel!!");
+    			bar.energy = 1.0;
+    			state.lostLife();
+    			nave.reset({x: WIDTH/2, y: HEIGHT/2});
+
+    			if(state.life == 0) {
+    				alert("Game Over!!");
+    				state.reset();
+    				bar.energy = 1.0;
+    			}
+          //Reposiciona a base
+    			base.pos.x = Math.random() * (WIDTH-150);
+    		}
+
+        ctx.drawImage(fundo, 0,0);
+
+        //propriedades da barra de combustivel
+        ctx.strokeStyle = "#a0afa1";//Controla a borda
+        if(bar.energy<=0.2)//Controla a cor
+        {
+          ctx.fillStyle = "#ff1000";
+        }else if(bar.energy>0.2 && bar.energy<=0.4)
+        {
+          ctx.fillStyle = "#a51309";
+        }else if(bar.energy>0.4 && bar.energy<0.7)
+        {
+          ctx.fillStyle = "#d6d60a";
+        }else{
+          ctx.fillStyle = "#00ff15";
+        }
+
+    		ctx.fillRect(bar.pos.x, bar.pos.y, bar.energy * bar.size.w, bar.size.h);
+    		ctx.strokeRect(bar.pos.x, bar.pos.y, bar.size.w, bar.size.h);
+
+        // propriedades da base
+        ctx.fillStyle = "#FFFFFF";
+    		ctx.strokeStyle = "#000000";
+    		ctx.fillRect(base.pos.x, base.pos.y, base.size.w, base.size.h);
+    		ctx.strokeRect(base.pos.x, base.pos.y, base.size.w, base.size.h);
+
+    		nave.move(DT, G);
+        //Verifica a colisao da nave com a base
+    		if(base.pos.x < nave.coord.x && nave.coord.x < base.pos.x + base.size.w) {
+
+    			if(nave.coord.y + nave.size.h/2 > base.pos.y) {
+            if(nave.vel.vy < 40) {
+    					alert("Você venceu!");
+    					state.sumScore();
+    					nave.reset({x: WIDTH/2, y: HEIGHT/2});
+    				} else {
+    					alert("Você perdeu!");
+    					state.lostLife();
+    					nave.reset({x: WIDTH/2, y: HEIGHT/2});
+    					if(state.life == 0) {
+    						alert("Game Over!...");
+    						bar.energy = 1.0;
+    						state.reset();
+    					}
+    				}
+    				base.pos.x = Math.random() * (WIDTH-150);
+    			}
+    		} else {
+
+    			if(nave.coord.y + nave.size.h/2 > base.pos.y) {
+    				nave.coord.y = base.pos.y - nave.size.h/2;
+    				nave.acel.ay = 0;
+    				nave.vel.vy = 0;
+
+    				alert("Você perdeu!");
+    				state.lostLife();
+    				nave.reset({x: WIDTH/2, y: HEIGHT/2});
+    				if(state.life == 0) {
+    					alert("Game Over!...");
+    					state.reset();
+    				}
+    				base.pos.x = Math.random() * (WIDTH-150);
+    			}
+    		}
+    		nave.draw(ctx);
+    		state.show(ctx);
+    	}
+
+    	setInterval(loop, 1000/FPS);
+
+    	addEventListener("keydown", function(e){
+            <!--console.log(e.keyCode);-->
+    		if(e.keyCode == 87 || e.keyCode == 38) {// W
+    			nave.toUp(G);
+    			bar.energy -= 0.005;
+          e.preventDefault();
+    		} else if(e.keyCode == 65 || e.keyCode == 37) { // A
+    			nave.moveEs(G);
+    			bar.energy -= 0.0007;
+          e.preventDefault();
+    		} else if(e.keyCode == 83 || e.keyCode == 40) { // S
+    			nave.toDown(G);
+    			bar.energy -= 0.001;
+          e.preventDefault();
+    		} else if(e.keyCode == 68 || e.keyCode == 39) { // D
+    			nave.moveDir(G);
+    			bar.energy -= 0.001;
+          e.preventDefault();
+    		}
+    	});
+
+    	addEventListener("keyup", function(e){
+    		if(e.keyCode == 87 || e.keyCode == 83 || e.keyCode == 40 || e.keyCode == 38) { // W ou S
+    			nave.acel.ay = 0;
+    		} else if(e.keyCode == 65 || e.keyCode == 37) { // A
+    			nave.acel.ax = 0;
+    		} else if(e.keyCode == 68 || e.keyCode == 39) { // D
+    			nave.acel.ax = 0;
+    		}
+    	});
+    }
+    }
+    </script>
+    <!--fim javascript-->
+</html>

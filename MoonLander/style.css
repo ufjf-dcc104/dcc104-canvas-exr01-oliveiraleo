@@ -1,0 +1,20 @@
+body {
+	font-family: sans-serif;
+	background: #D3D3D3;
+	color: #DCD;
+}
+#container {
+	width: 800px;
+	margin: 0 auto;
+	text-align: center;
+	background: #111;
+	padding: 1px;
+}
+
+#container p {
+	font-size: 24px;
+}
+
+#container p span {
+	margin: 0 100px;
+}
