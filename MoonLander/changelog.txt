@@ -1,0 +1,36 @@
+Commit 1
+
+- Primeiro upload
+
+Commit 2
+
+- Atualização do readme
+
+Commit 3
+
+- Atualização do readme
+
+Commit 4
+
+- Atualização do readme
+
+Commit 5
+
+- Adição do chagelog+
+- Adição do controle de saida da tela
+- Adição do aviso de velocidade alta
+- Adição de um Pause para o jogo
+- Adição dos efeitos de som
+
+- Ajuste dos valores de aceleração que agora funcionam todos em função da gravidade (g)
+- Ajuste do gasto de combustível, que agora funciona em função de dt
+- Ajuste da altura inicial da nave
+- Ajuste no estado (State) da nave que agora controla o estado do jogo todo
+- Ajuste do Readme
+- Ajuste no valor da velocidade de pouso
+
+- Correção do bug do clique do mouse
+- Correção de bug no contador de vidas
+
+- Remoção de arquivos desnecessários (imagens)
+- Remoção de código desnecessário

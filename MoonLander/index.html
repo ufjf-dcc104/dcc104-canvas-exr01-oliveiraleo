@@ -3,6 +3,7 @@
         <meta charset="utf-8"/>
         <link rel="stylesheet" type="text/css" href="style.css">
         <script type="text/javascript" src="sprite.js"></script>
+
         <title>Exercicio 1 - Lista 1</title>
     </head>
 
@@ -14,7 +15,16 @@
         </div>
    </body>
     <!--começo javascript -->
-<script type="text/javascript">
+    <script type="text/javascript">
+    //Sleep function
+    function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > milliseconds){
+          break;
+        }
+      }
+    }
     //configura o texto
     function Text(font, size, rgb) {
     	this.font = font 	|| "Arial";
@@ -27,44 +37,91 @@
     		ctx.fillText(text, x, y);
     	}
     }
+    //Controle do pause
+    var mudaPause = function(){
+    	pause = !pause;
+    }
     //controle de estado
     function State() {
-    	this.life = 3;
+    	this.life = 5;
     	this.score = 0;
+      this.velocidade = 0;
+      this.avisos = " ";
+      this.id = 0;
     	this.text = new Text();
 
+      //Funcoes auxiliares do texto da tela
     	this.sumScore = function() { this.score++; }
     	this.lostLife = function() { this.life--; }
+      this.sumLife = function() { this.life++; }
+      this.sumVel = function(v){//Display da velocidade
+        if(v>40.0){
+          this.velocidade = "Velocidade alta para pouso!!!";
+        }else {
+          this.velocidade = " ";
+        }
+      }
+      this.mudaAvisos = function(msgId){
+        mudaPause();
+        if (msgId == 1) {
+          this.avisos = "Teste";
+          //sleep(2000);
+          //this.avisos = "Teste2";
+        }
+        //this.avisos = " ";
+        msgId = 0;
+      }
 
       //exibe o texto
     	this.show = function(ctx) {
     		this.text.raster(ctx, "Vidas:  " + this.life, 10, 20);
-    		this.text.raster(ctx, "Pontos: " + this.score, 650, 20);
+    		this.text.raster(ctx, "Pontos:  " + this.score, 650, 20);
     		this.text.raster(ctx, "Combustivel: ", 10, 52);
+        this.text.raster(ctx, " " + this.velocidade, 275, 20);
+        this.text.raster(ctx, " " + this.avisos, 275, 100);
     	}
 
     	this.reset = function() {
     		this.life = 5;
     		this.score = 0;
+        this.avisos = " ";
+        gameover.play();
     	}
     }
 
-    var clique = 0;//bloqeuia o mouse depois que o jogo comeca
+    //variaveis globais
+    var clique = 0;//bloqueia o mouse depois que o jogo comeca
+    var pause = false;
+    var state = new State();//Cria o estado global do jogo
+    //sons
+    var musica = new Audio('audio/wind.mp3');
+    var explosao = new Audio('audio/boom.mp3');
+    var ganhou = new Audio('audio/win.mp3');
+    var gameover = new Audio('audio/gameover.mp3');
+    var intro = new Audio('audio/intro.mp3');
+    var hit = new Audio('audio/hit.mp3');
+    var pauseSom = new Audio('audio/blink.mp3');
+    var levelup = new Audio('audio/levelup.mp3');
+    var dead = new Audio('audio/dead.mp3');
 
     function aviso(){//espera o inicio do jogo
-      alert("Clique na tela para começar o jogo");
+      console.log("Clique na tela para começar o jogo");
+
+      //console.log(state.id);
     }
 
     function start() {//comeca o jogo
-      if(clique>0){
-        alert("Não clique novamente!");
-      }else {
+        //this.avisos = " ";
+      if(clique>0){//controle bloqueio mouse
+        //state.mudaAvisos(1);
+        //console.log(state.id);
+        console.log("Clique bloqueado");
+      }else{
         clique++;
-        //console.log(clique);
-
+        intro.play();
     	var canvas = document.getElementById("tela");
     	var ctx = canvas.getContext("2d");
-    	var state = new State();
+    	//var state = new State();
 
     	const WIDTH = canvas.offsetWidth;
     	const HEIGHT = canvas.offsetHeight;
@@ -79,21 +136,40 @@
         fundo.src = "lua.jpg";
 
       //cria a nave na tela
-    	var nave = new Sprite(new Point(WIDTH/2, HEIGHT/2), new Size(80, 120), "nave3.png");
+    	var nave = new Sprite(new Point(WIDTH/2, HEIGHT/3), new Size(80, 120), "nave.png");
       //cria a barra de combustivel na tela
     	var bar = { pos: new Point(135, 37), size: new Size(WIDTH-170, 15), energy: 1.0 };
 
-
+      //Regra do jogo
     	var loop = function() {
-    		ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        if(pause){//controla o pause
+          nave.vel.vx = 0;
+          nave.vel.vy = 0;
+          nave.acel.ax = 0;
+          nave.acel.ay = 0;
+        }else {//executa o jogo
+          ctx.clearRect(0, 0, WIDTH, HEIGHT);
+          //musica do jogo
+          musica.play();
+          musica.addEventListener('ended', function() {
+          this.currentTime = 0;
+          this.play();
+          });
+        //velocidade
+        var velocidadeTotal = nave.vel.vx + nave.vel.vy;
+        state.sumVel(velocidadeTotal);
+
     		if(bar.energy <= 0.0) {
-    			alert("Acabou o combustivel!!");
+    			console.log("Acabou o combustivel!!");
+          //gameover.play();
+          dead.play();
     			bar.energy = 1.0;
     			state.lostLife();
-    			nave.reset({x: WIDTH/2, y: HEIGHT/2});
+    			nave.reset({x: WIDTH/2, y: HEIGHT/3});
 
     			if(state.life == 0) {
-    				alert("Game Over!!");
+    				console.log("Game Over!!");
+            gameover.play();
     				state.reset();
     				bar.energy = 1.0;
     			}
@@ -120,28 +196,64 @@
 
     		ctx.fillRect(bar.pos.x, bar.pos.y, bar.energy * bar.size.w, bar.size.h);
     		ctx.strokeRect(bar.pos.x, bar.pos.y, bar.size.w, bar.size.h);
-
         // propriedades da base
         ctx.fillStyle = "#FFFFFF";
     		ctx.strokeStyle = "#000000";
     		ctx.fillRect(base.pos.x, base.pos.y, base.size.w, base.size.h);
     		ctx.strokeRect(base.pos.x, base.pos.y, base.size.w, base.size.h);
 
+        //move a nave
     		nave.move(DT, G);
+
+        //Controle da barra de combustivel
+        if(nave.acel.ay<0){
+          bar.energy -= 0.05*DT;
+        }else if(nave.acel.ay>0){
+          bar.energy -= 0.03*DT;
+        }else if (nave.acel.ax>0 || nave.acel.ax<0) {
+          bar.energy -= 0.02*DT;
+        }
+        //controle de saida da tela
+        if(nave.coord.y - nave.size.h  < 0 ){//saida em cima
+          nave.coord.y = nave.size.h;
+          nave.acel.ay = 0;
+          nave.acel.ax = 0;
+          nave.vel.vy = 0;
+          hit.play();
+        }else if(nave.coord.x - (nave.size.w/2) < 0) {//saida pela esquerda
+          nave.coord.x = (nave.size.w/2);
+          nave.acel.ay = 0;
+          nave.acel.ax = 0;
+          nave.vel.vx = 0;
+          hit.play();
+        }else if(nave.coord.x + (nave.size.w/2) > WIDTH) {//saida pela direita
+          nave.coord.x = WIDTH - (nave.size.w/2);
+          nave.acel.ay = 0;
+          nave.acel.ax = 0;
+          nave.vel.vx = 0;
+          hit.play();
+        }
+
         //Verifica a colisao da nave com a base
     		if(base.pos.x < nave.coord.x && nave.coord.x < base.pos.x + base.size.w) {
 
     			if(nave.coord.y + nave.size.h/2 > base.pos.y) {
-            if(nave.vel.vy < 40) {
-    					alert("Você venceu!");
+            if(nave.vel.vy < 50) {
+    					console.log("Você venceu!");
+              ganhou.play();
     					state.sumScore();
-    					nave.reset({x: WIDTH/2, y: HEIGHT/2});
+              if(state.score%5 == 0){
+                levelup.play();
+                state.sumLife();
+              }
+    					nave.reset({x: WIDTH/2, y: HEIGHT/3});
     				} else {
-    					alert("Você perdeu!");
+    					console.log("Você perdeu!");
+              explosao.play();
     					state.lostLife();
-    					nave.reset({x: WIDTH/2, y: HEIGHT/2});
+    					nave.reset({x: WIDTH/2, y: HEIGHT/3});
     					if(state.life == 0) {
-    						alert("Game Over!...");
+    						console.log("Game Over!...");
     						bar.energy = 1.0;
     						state.reset();
     					}
@@ -154,12 +266,12 @@
     				nave.coord.y = base.pos.y - nave.size.h/2;
     				nave.acel.ay = 0;
     				nave.vel.vy = 0;
-
-    				alert("Você perdeu!");
+            explosao.play();
+    				console.log("Você perdeu!");
     				state.lostLife();
-    				nave.reset({x: WIDTH/2, y: HEIGHT/2});
+    				nave.reset({x: WIDTH/2, y: HEIGHT/3});
     				if(state.life == 0) {
-    					alert("Game Over!...");
+    					console.log("Game Over!...");
     					state.reset();
     				}
     				base.pos.x = Math.random() * (WIDTH-150);
@@ -167,29 +279,41 @@
     		}
     		nave.draw(ctx);
     		state.show(ctx);
+        //console.log(nave.vel.vy);
     	}
+    }
 
     	setInterval(loop, 1000/FPS);
 
+      /*function aviso(){//espera o inicio do jogo
+        console.log("Clique na tela para começar o jogo");
+        ctx.fillText("teste");
+        //console.log(state.id);
+      }*/
+
     	addEventListener("keydown", function(e){
-            <!--console.log(e.keyCode);-->
     		if(e.keyCode == 87 || e.keyCode == 38) {// W
     			nave.toUp(G);
-    			bar.energy -= 0.005;
+    			//bar.energy -= 0.1*DT;
           e.preventDefault();
     		} else if(e.keyCode == 65 || e.keyCode == 37) { // A
     			nave.moveEs(G);
-    			bar.energy -= 0.0007;
+    			//bar.energy -= 0.0007;
           e.preventDefault();
     		} else if(e.keyCode == 83 || e.keyCode == 40) { // S
     			nave.toDown(G);
-    			bar.energy -= 0.001;
+    			//bar.energy -= 0.05*DT;
           e.preventDefault();
     		} else if(e.keyCode == 68 || e.keyCode == 39) { // D
     			nave.moveDir(G);
-    			bar.energy -= 0.001;
+    			//bar.energy -= 0.001;
           e.preventDefault();
-    		}
+    		} else if (e.keyCode == 32) { // Space Bar
+          this.mudaPause();
+          pauseSom.volume = 1.0;
+          pauseSom.play();
+          e.preventDefault();
+        }
     	});
 
     	addEventListener("keyup", function(e){
@@ -201,6 +325,7 @@
     			nave.acel.ax = 0;
     		}
     	});
+
     }
     }
     </script>

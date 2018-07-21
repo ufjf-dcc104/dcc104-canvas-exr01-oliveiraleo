@@ -7,6 +7,12 @@ Para jogar:
 
 2- Abra o arquivo index.html
 
-3- Siga as instruções na tela
+3- Clique na tela para começar o jogo
 
 4- Divirta-se!
+
+Controles:
+
+Setas direcionam a nave
+
+Barra de espaço pausa o jogo
