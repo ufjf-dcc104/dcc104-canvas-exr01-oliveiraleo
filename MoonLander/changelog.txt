@@ -1,22 +1,22 @@
-Commit 1
+-> Commit 1
 
 - Primeiro upload
 
-Commit 2
+-> Commit 2
 
 - Atualização do readme
 
-Commit 3
+-> Commit 3
 
 - Atualização do readme
 
-Commit 4
+-> Commit 4
 
 - Atualização do readme
 
-Commit 5
+-> Commit 5
 
-- Adição do chagelog+
+- Adição do chagelog
 - Adição do controle de saida da tela
 - Adição do aviso de velocidade alta
 - Adição de um Pause para o jogo
@@ -34,3 +34,14 @@ Commit 5
 
 - Remoção de arquivos desnecessários (imagens)
 - Remoção de código desnecessário
+
+-> Commit 6
+
+-Adição de novos sons
+
+- Ajuste do changelog
+- Ajuste nos comentários do código
+
+- Correção dos sons
+
+- Remoção da função de avisos (não será mais usada)
