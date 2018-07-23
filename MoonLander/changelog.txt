@@ -37,11 +37,19 @@
 
 -> Commit 6
 
--Adição de novos sons
+- Adição de novos sons
+- Adição da função de inicio (somente começa se aperta ENTER)
+- Adição de mensagens no canvas
 
 - Ajuste do changelog
 - Ajuste nos comentários do código
+- Ajuste da função de pause
+- Ajuste no canvas
+- Ajuste no context
+- Ajuste no pause
 
 - Correção dos sons
+- Correção do Readme
 
 - Remoção da função de avisos (não será mais usada)
+- Remoção da função de sleep

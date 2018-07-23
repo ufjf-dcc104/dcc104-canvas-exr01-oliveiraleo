@@ -7,11 +7,13 @@ Para jogar:
 
 2- Abra o arquivo index.html
 
-3- Clique na tela para começar o jogo
+3- Sigas as instruções na tela
 
 4- Divirta-se!
 
 Controles:
+
+Enter inicia o jogo
 
 Setas direcionam a nave
 

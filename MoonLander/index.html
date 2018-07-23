@@ -7,7 +7,7 @@
         <title>Exercicio 1 - Lista 1</title>
     </head>
 
-    <body  onLoad="aviso()" onclick="start()" >
+    <body onLoad="start()">
         <div id="container">
             <canvas id="tela" width="800" height="600">
                 Erro no canvas!
@@ -16,15 +16,6 @@
    </body>
     <!--começo javascript -->
     <script type="text/javascript">
-    //Sleep function
-    /*function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > milliseconds){
-          break;
-        }
-      }
-    }*/
     //configura o texto
     function Text(font, size, rgb) {
     	this.font = font 	|| "Arial";
@@ -39,10 +30,11 @@
     }
 
     //variaveis globais
-    var clique = 0;//bloqueia o mouse depois que o jogo comeca
-    var pause = false;
+    //var clique = 0;//bloqueia o mouse depois que o jogo comeca
+    var pause = false;//controle do pause
     var state = new State();//Cria o estado global do jogo
-    const VLIMITE = 50.0;
+    var inicio = false;
+    const VLIMITE = 50.0; //velocidade de pouso máxima
     //sons
     var musica = new Audio('audio/wind.mp3');
     var explosao = new Audio('audio/boom.mp3');
@@ -57,6 +49,7 @@
     function mudaPause(){
       pause = !pause;
     }
+
     //controle de estado
     function State() {
     	this.life = 5;
@@ -94,21 +87,24 @@
     	}
     }
 
-    function aviso(){//espera o inicio do jogo
+    /*function aviso(){//espera o inicio do jogo
       console.log("Clique na tela para começar o jogo");
-    }
+    }*/
 
     function start() {//comeca o jogo
-      if(clique>0){//controle bloqueio mouse
-        console.log("Clique bloqueado");
-      }else{//execucao
-        clique++;
+        var canvas = document.getElementById("tela");
+        var ctx = canvas.getContext("2d");
+
+        const WIDTH = canvas.offsetWidth;
+        const HEIGHT = canvas.offsetHeight;
+
         intro.play();
-    	var canvas = document.getElementById("tela");
-    	var ctx = canvas.getContext("2d");
+
+    	//var canvas = document.getElementById("tela");
+    	//var ctx = canvas.getContext("2d");
       //difinição das constantes do jogo
-      const WIDTH = canvas.offsetWidth;
-    	const HEIGHT = canvas.offsetHeight;
+      //const WIDTH = canvas.offsetWidth;
+    	//const HEIGHT = canvas.offsetHeight;
     	const base = { pos: new Point(Math.random() * (WIDTH-150), HEIGHT-15),
                     size: new Size(150, 15) };
 
@@ -126,12 +122,7 @@
 
       //Regra do jogo
     	var loop = function() {
-        if(pause){//controla o pause
-          nave.vel.vx = 0;
-          nave.vel.vy = 0;
-          nave.acel.ax = 0;
-          nave.acel.ay = 0;
-        }else {//executa o jogo
+        if(inicio && !pause){
           ctx.clearRect(0, 0, WIDTH, HEIGHT);
           //musica do jogo
           musica.play();
@@ -163,17 +154,13 @@
     		}
 
         ctx.drawImage(fundo, 0,0);
-
         //propriedades da barra de combustivel
         ctx.strokeStyle = "#a0afa1";//Controla a borda
-        if(bar.energy<=0.2)//Controla a cor
-        {
+        if(bar.energy<=0.2){//Controla a cor
           ctx.fillStyle = "#ff1000";
-        }else if(bar.energy>0.2 && bar.energy<=0.4)
-        {
+        }else if(bar.energy>0.2 && bar.energy<=0.4){
           ctx.fillStyle = "#a51309";
-        }else if(bar.energy>0.4 && bar.energy<0.7)
-        {
+        }else if(bar.energy>0.4 && bar.energy<0.7){
           ctx.fillStyle = "#d6d60a";
         }else{
           ctx.fillStyle = "#00ff15";
@@ -265,41 +252,45 @@
     				base.pos.x = Math.random() * (WIDTH-150);
     			}
     		}
+
     		nave.draw(ctx);
     		state.show(ctx);
         //console.log(nave.vel.vy);
-    	}
+      }else if(!inicio){
+        var msg = new Text("Courier", 30, "white");
+        canvas.fillStyle = "black";
+        canvas.fillRect = (0,0,WIDTH, HEIGHT);
+        msg.raster(ctx, "Aperte ENTER para começar", WIDTH/5, HEIGHT/2 );
+      }else if(pause){
+        var msg = new Text("Courier", 30, "white");
+        //canvas.fillStyle = "black";
+        //canvas.fillRect = (0,0,WIDTH, HEIGHT);
+        msg.raster(ctx, "Aperte ESPAÇO para continuar", WIDTH/5, HEIGHT/4 );
+      }
     }
 
     	setInterval(loop, 1000/FPS);
 
-      /*function aviso(){//espera o inicio do jogo
-        console.log("Clique na tela para começar o jogo");
-        ctx.fillText("teste");
-        //console.log(state.id);
-      }*/
-
     	addEventListener("keydown", function(e){
     		if(e.keyCode == 87 || e.keyCode == 38) {// W
     			nave.toUp(G);
-    			//bar.energy -= 0.1*DT;
           e.preventDefault();
     		} else if(e.keyCode == 65 || e.keyCode == 37) { // A
     			nave.moveEs(G);
-    			//bar.energy -= 0.0007;
           e.preventDefault();
     		} else if(e.keyCode == 83 || e.keyCode == 40) { // S
     			nave.toDown(G);
-    			//bar.energy -= 0.05*DT;
           e.preventDefault();
     		} else if(e.keyCode == 68 || e.keyCode == 39) { // D
     			nave.moveDir(G);
-    			//bar.energy -= 0.001;
           e.preventDefault();
     		} else if (e.keyCode == 32) { // Space Bar
           this.mudaPause();
           pauseSom.volume = 1.0;
           pauseSom.play();
+          e.preventDefault();
+        } else if (e.keyCode == 13){ // Enter
+          this.inicio = true;
           e.preventDefault();
         }
     	});
@@ -313,8 +304,6 @@
     			nave.acel.ax = 0;
     		}
     	});
-
-    }
     }
     </script>
     <!--fim javascript-->
