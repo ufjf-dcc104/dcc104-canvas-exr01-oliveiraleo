@@ -53,3 +53,14 @@
 
 - Remoção da função de avisos (não será mais usada)
 - Remoção da função de sleep
+
+-> Commit 7
+
+- Adição de novas funções da bilbioteca de áudio
+
+- Ajuste na forma com que o player de som é usado
+- Ajuste dos comentários
+
+- Correção dos sons do jogo (agora eles conseguem fazer "overlap")
+
+- Remoção de código desnecesário

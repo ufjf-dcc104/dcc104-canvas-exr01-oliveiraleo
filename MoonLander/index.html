@@ -28,12 +28,13 @@
     		ctx.fillText(text, x, y);
     	}
     }
-
     //variaveis globais
-    //var clique = 0;//bloqueia o mouse depois que o jogo comeca
+    var msg = new Text("Courier", 30, "white");
+
     var pause = false;//controle do pause
     var state = new State();//Cria o estado global do jogo
     var inicio = false;
+
     const VLIMITE = 50.0; //velocidade de pouso máxima
     //sons
     var musica = new Audio('audio/wind.mp3');
@@ -41,15 +42,29 @@
     var ganhou = new Audio('audio/win.mp3');
     var gameover = new Audio('audio/gameover.mp3');
     var intro = new Audio('audio/intro.mp3');
-    var hit = new Audio('audio/hit.mp3');
-    var pauseSom = new Audio('audio/blink.mp3');
     var levelup = new Audio('audio/levelup.mp3');
     var dead = new Audio('audio/dead.mp3');
-    //Controle do pause
-    function mudaPause(){
-      pause = !pause;
+
+    var hit = new Audio();
+    hit.src = "audio/hit2.mp3";
+    var pauseSom = new Audio();
+    pauseSom.src = "audio/blink.mp3";
+
+    var pancada = function(){
+      hit.load();
+      hit.play();
     }
 
+    var parada = function(){
+      pauseSom.volume = 1.0;
+      pauseSom.load();
+      pauseSom.play();
+    }
+    //Controle do pause
+    function mudaPause(){
+      parada();
+      pause = !pause;
+    }
     //controle de estado
     function State() {
     	this.life = 5;
@@ -58,7 +73,6 @@
       this.avisos = " ";
       this.id = 0;
     	this.text = new Text();
-
       //Funcoes auxiliares do texto da tela
     	this.sumScore = function() { this.score++; }
     	this.lostLife = function() { this.life--; }
@@ -70,7 +84,6 @@
           this.velocidade = " ";
         }
       }
-
       //exibe o texto
     	this.show = function(ctx) {
     		this.text.raster(ctx, "Vidas:  " + this.life, 10, 20);
@@ -87,10 +100,6 @@
     	}
     }
 
-    /*function aviso(){//espera o inicio do jogo
-      console.log("Clique na tela para começar o jogo");
-    }*/
-
     function start() {//comeca o jogo
         var canvas = document.getElementById("tela");
         var ctx = canvas.getContext("2d");
@@ -98,15 +107,9 @@
         const WIDTH = canvas.offsetWidth;
         const HEIGHT = canvas.offsetHeight;
 
-        intro.play();
+        intro.play();//musica de inicio
 
-    	//var canvas = document.getElementById("tela");
-    	//var ctx = canvas.getContext("2d");
-      //difinição das constantes do jogo
-      //const WIDTH = canvas.offsetWidth;
-    	//const HEIGHT = canvas.offsetHeight;
-    	const base = { pos: new Point(Math.random() * (WIDTH-150), HEIGHT-15),
-                    size: new Size(150, 15) };
+    	const base = { pos: new Point(Math.random() * (WIDTH-150), HEIGHT-15), size: new Size(150, 15) };
 
     	const FPS = 60;
     	const DT = 1/FPS;
@@ -114,12 +117,10 @@
       //ajusta o fundo da tela
         var fundo  =  new Image();
         fundo.src = "img/lua.jpg";
-
       //cria a nave na tela
     	var nave = new Sprite(new Point(WIDTH/2, HEIGHT/3), new Size(80, 120), "img/nave.png");
       //cria a barra de combustivel na tela
     	var bar = { pos: new Point(135, 37), size: new Size(WIDTH-170, 15), energy: 1.0 };
-
       //Regra do jogo
     	var loop = function() {
         if(inicio && !pause){
@@ -173,10 +174,8 @@
     		ctx.strokeStyle = "#000000";
     		ctx.fillRect(base.pos.x, base.pos.y, base.size.w, base.size.h);
     		ctx.strokeRect(base.pos.x, base.pos.y, base.size.w, base.size.h);
-
         //move a nave
     		nave.move(DT, G);
-
         //Controle da barra de combustivel
         if(nave.acel.ay<0){
           bar.energy -= 0.05*DT;
@@ -191,24 +190,22 @@
           nave.acel.ay = 0;
           nave.acel.ax = 0;
           nave.vel.vy = 0;
-          hit.play();
+          pancada();
         }else if(nave.coord.x - (nave.size.w/2) < 0) {//saida pela esquerda
           nave.coord.x = (nave.size.w/2);
           nave.acel.ay = 0;
           nave.acel.ax = 0;
           nave.vel.vx = 0;
-          hit.play();
+          pancada();
         }else if(nave.coord.x + (nave.size.w/2) > WIDTH) {//saida pela direita
           nave.coord.x = WIDTH - (nave.size.w/2);
           nave.acel.ay = 0;
           nave.acel.ax = 0;
           nave.vel.vx = 0;
-          hit.play();
+          pancada();
         }
-
         //Verifica a colisao da nave com a base
     		if(base.pos.x < nave.coord.x && nave.coord.x < base.pos.x + base.size.w) {
-
     			if(nave.coord.y + nave.size.h/2 > base.pos.y) {
             if(nave.vel.vy < VLIMITE) {
     					console.log("Você venceu!");
@@ -252,19 +249,13 @@
     				base.pos.x = Math.random() * (WIDTH-150);
     			}
     		}
-
     		nave.draw(ctx);
     		state.show(ctx);
-        //console.log(nave.vel.vy);
       }else if(!inicio){
-        var msg = new Text("Courier", 30, "white");
         canvas.fillStyle = "black";
         canvas.fillRect = (0,0,WIDTH, HEIGHT);
         msg.raster(ctx, "Aperte ENTER para começar", WIDTH/5, HEIGHT/2 );
       }else if(pause){
-        var msg = new Text("Courier", 30, "white");
-        //canvas.fillStyle = "black";
-        //canvas.fillRect = (0,0,WIDTH, HEIGHT);
         msg.raster(ctx, "Aperte ESPAÇO para continuar", WIDTH/5, HEIGHT/4 );
       }
     }
@@ -275,19 +266,17 @@
     		if(e.keyCode == 87 || e.keyCode == 38) {// W
     			nave.toUp(G);
           e.preventDefault();
-    		} else if(e.keyCode == 65 || e.keyCode == 37) { // A
+    		} if(e.keyCode == 65 || e.keyCode == 37) { // A
     			nave.moveEs(G);
           e.preventDefault();
-    		} else if(e.keyCode == 83 || e.keyCode == 40) { // S
+    		} if(e.keyCode == 83 || e.keyCode == 40) { // S
     			nave.toDown(G);
           e.preventDefault();
-    		} else if(e.keyCode == 68 || e.keyCode == 39) { // D
+    		} if(e.keyCode == 68 || e.keyCode == 39) { // D
     			nave.moveDir(G);
           e.preventDefault();
-    		} else if (e.keyCode == 32) { // Space Bar
+    		} if (e.keyCode == 32) { // Space Bar
           this.mudaPause();
-          pauseSom.volume = 1.0;
-          pauseSom.play();
           e.preventDefault();
         } else if (e.keyCode == 13){ // Enter
           this.inicio = true;
