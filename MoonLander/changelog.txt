@@ -64,3 +64,8 @@
 - Correção dos sons do jogo (agora eles conseguem fazer "overlap")
 
 - Remoção de código desnecesário
+
+-> Commit 8 (a fazer)
+
+- Ajuste no código
+- Ajuste nos arquivos de código fonte

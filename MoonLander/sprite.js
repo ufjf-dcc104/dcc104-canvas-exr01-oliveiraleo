@@ -21,8 +21,9 @@ function Sprite(coord, size, url) {
 	this.vel   = {vx: 0, vy: 0};
 	this.acel  = {ax: 0, ay: 0};
 	this.omega = 0;
+	this.vento = -50;
 	//desenha
-	this.draw = function(ctx) {
+	this.draw = function(ctx, g) {
 		ctx.save();
 		ctx.translate(this.coord.x, this.coord.y);
 
@@ -31,7 +32,7 @@ function Sprite(coord, size, url) {
 	}
 	//movimenta
 	this.move = function(dt, g) {
-		this.vel.vx += this.acel.ax * dt;
+		this.vel.vx += (this.vento + this.acel.ax) * dt;
 		this.vel.vy += (this.acel.ay - g) * dt;
 
 		this.coord.x += this.vel.vx * dt;
@@ -46,7 +47,7 @@ function Sprite(coord, size, url) {
 	}
 	//controle movimento
 	this.moveDir = function(g) {
-			this.acel.ax = -1 * g;
+			this.acel.ax = -1.5 * g;
 	}
     this.moveEs = function(g) {
 			this.acel.ax = g;
